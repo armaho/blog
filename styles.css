@@ -1,0 +1,73 @@
+:root {
+  --text-color: #ddd;
+  --text-color-focus: #eee;
+  --background-color: #222;
+  --green: #387438;
+}
+
+body {
+  display: grid;
+  grid-template-columns: 1fr min(100ch, 100%) 1fr;
+  margin: 0;
+  color: var(--text-color);
+  font-family: "Zilla Slab", serif;
+  background-color: var(--background-color);
+}
+
+header {
+  margin-bottom: 40px;
+}
+
+#blog {
+  grid-column: 2 / 3;
+  padding: 20px;
+}
+
+#profile {
+  display: flex;
+  align-items: end;
+  margin-bottom: 20px;
+}
+
+#me-pixelated {
+  display: inline;
+  height: 5rem;
+}
+
+#blog-title {
+  display: inline;
+  margin: 0;
+  font-size: 2.5rem;
+  vertical-align: bottom;
+  line-height: 1.05;
+  text-decoration: underline;
+  text-decoration-color: var(--green);
+  text-decoration-thickness: 4px;
+}
+
+nav a:any-link {
+  font-size: 1.25rem;
+  text-decoration: none;
+  color: var(--text-color);
+}
+
+nav a:not(:last-child) {
+  margin-right: 25px;
+}
+
+nav a:is(:focus, :hover) {
+  color: var(--text-color-focus);
+}
+
+article {
+  font-size: 1rem;
+}
+
+article :is(h1, h2, h3, h4, h5, h6) {
+  text-decoration: underline;
+  text-decoration-color: var(--green);
+  text-decoration-thickness: 3px;
+}
+
+@media(max-width: 50em) {
+}

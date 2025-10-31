@@ -59,11 +59,11 @@ nav a:is(:focus, :hover) {
   color: var(--text-color-focus);
 }
 
-article {
+main {
   font-size: 1rem;
 }
 
-article :is(h1, h2, h3, h4, h5, h6) {
+main :is(h1, h2, h3, h4, h5, h6) {
   text-decoration: underline;
   text-decoration-color: var(--green);
   text-decoration-thickness: 3px;

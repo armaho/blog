@@ -60,8 +60,8 @@ func targetPathFromContentPath(path string) string {
 	targetDir := targetDirectory()
 	contentDir := contentDirectory()
 
-	if strings.HasPrefix(path, contentDir) {
-		return targetDir + strings.TrimPrefix(path, contentDir)
+	if after, ok := strings.CutPrefix(path, contentDir); ok  {
+		return targetDir + after
 	}
 	return path;
 }
@@ -154,6 +154,8 @@ func main() {
 		panic(err)
 	}
 
-	filepath.WalkDir(contentDirectory(), contentFileHandler)
+	if err := filepath.WalkDir(contentDirectory(), contentFileHandler); err != nil {
+		panic(err)
+	}
 }
 

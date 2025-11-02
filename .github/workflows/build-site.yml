@@ -16,10 +16,14 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: '1.22.x'
+          cache: true
+          cache-dependency-path: |
+            generator/go.mod
+            generator/go.sum
 
       - name: "build generator"
-        run: |
-          cd generator
+        working-directory: ./generator
+        run: 
           go build -o ../sitegen
 
       - name: "generate site"

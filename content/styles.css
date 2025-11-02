@@ -1,6 +1,7 @@
 :root {
   --text-color: #ddd;
-  --text-color-focus: #eee;
+  --text-color-info: #bbb;
+  --text-color-focus: #fff;
   --background-color: #222;
   --green: #387438;
 }
@@ -37,7 +38,7 @@ header {
 #blog-title {
   display: inline;
   margin: 0;
-  font-size: 2.5rem;
+  font-size: 2.25rem;
   vertical-align: bottom;
   line-height: 1.05;
   text-decoration: underline;
@@ -75,6 +76,17 @@ main a {
 
 main a:is(:focus, :hover) {
   color: var(--text-color-focus);
+}
+
+.article-preview {
+  max-height: 20rem;
+  overflow: hidden;
+  mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+  margin-bottom: 20px;
+}
+
+.article-info {
+  color: var(--text-color-info);
 }
 
 @media(max-width: 50em) {

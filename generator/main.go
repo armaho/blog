@@ -25,7 +25,7 @@ func deleteDirIfExists(path string) error {
 			return fmt.Errorf("failed to remove directory %s: %w", path, err)
 		}
 	}
-	
+
 	return nil
 }
 
@@ -60,14 +60,14 @@ func targetPathFromContentPath(path string) string {
 	targetDir := targetDirectory()
 	contentDir := contentDirectory()
 
-	if after, ok := strings.CutPrefix(path, contentDir); ok  {
+	if after, ok := strings.CutPrefix(path, contentDir); ok {
 		return targetDir + after
 	}
-	return path;
+	return path
 }
 
 func handleDirectory(path string) error {
-	return createDir(targetPathFromContentPath(path));
+	return createDir(targetPathFromContentPath(path))
 }
 
 func handleHtmlFile(path string) error {
@@ -118,7 +118,7 @@ func handleHtmlFile(path string) error {
 }
 
 func handleNormalFile(path string) error {
-	src, err := os.Open(path);
+	src, err := os.Open(path)
 	if err != nil {
 		return err
 	}
@@ -140,7 +140,7 @@ func contentFileHandler(path string, entry fs.DirEntry, err error) error {
 	}
 
 	if entry.IsDir() {
-		return handleDirectory(path);
+		return handleDirectory(path)
 	}
 
 	if filepath.Ext(path) == ".html" {
@@ -158,4 +158,3 @@ func main() {
 		panic(err)
 	}
 }
-

@@ -7,7 +7,9 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
+	"time"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -17,6 +19,14 @@ type articleInfo struct {
 	WordCount     int    `json:"word_count"`
 	EstimatedTime int    `json:"estimated_time"`
 }
+
+type article struct {
+	date time.Time
+	content string
+	url string
+}
+
+var articles []article
 
 func createDir(path string) error {
 	if err := os.MkdirAll(path, 0755); err != nil {
@@ -105,6 +115,16 @@ func addMetadataToArticle(metadata articleInfo, html string) string {
 	return metadataTag + html
 }
 
+func convertArticlePathToUrl(path string) string {
+	const marker = "/articles/"
+	i := strings.Index(path, marker)
+	if i == -1 {
+		return path
+	}
+
+	return path[i:]
+}
+
 func handleHtmlFile(path string) error {
 	tmplFile, err := os.Open(templatePath())
 	if err != nil {
@@ -143,6 +163,17 @@ func handleHtmlFile(path string) error {
 		}
 
 		html = addMetadataToArticle(metadata, html)
+
+		releaseDate, err := time.Parse("2006-01-02", metadata.ReleaseDate)
+		if err != nil {
+			return fmt.Errorf("Invalid date found in %s: %s", path, metadata.ReleaseDate)
+		}
+		art := article{
+			content: html,
+			url: convertArticlePathToUrl(path),
+			date: releaseDate,
+		}
+		articles = append(articles, art)
 	}
 
 	tmplDoc.Find("#content").SetHtml(html)
@@ -192,6 +223,61 @@ func contentFileHandler(path string, entry fs.DirEntry, err error) error {
 	return handleNormalFile(path)
 }
 
+func generateHomePage() error {
+	sort.Slice(articles, func(i, j int) bool {
+		return articles[i].date.After(articles[j].date)
+	})
+
+	var previews strings.Builder
+	for _, a := range articles {
+		doc, err := goquery.NewDocumentFromReader(strings.NewReader(a.content))
+		if err != nil {
+			panic(err)
+		}
+
+		doc.Find("h1").Each(func(i int, h1 *goquery.Selection) {
+			titleText := h1.Text() 
+			h1.SetHtml(fmt.Sprintf(`<a class="article-title-link" href="%s">%s</a>`, a.url, titleText))
+		})
+
+		modifiedHTML, err := doc.Html()
+		if err != nil {
+			panic(err)
+		}
+
+		previews.WriteString(fmt.Sprintf(
+			`<div class="article-preview">%s</div>`,
+			modifiedHTML,
+		))
+		previews.WriteString("\n")	
+	}
+
+	tmplFile, err := os.Open(templatePath())
+	if err != nil {
+		return err
+	}
+	defer tmplFile.Close()
+
+	tmpl, err := goquery.NewDocumentFromReader(tmplFile)
+	if err != nil {
+		return fmt.Errorf("Failed to parse template: %w", err)
+	}
+
+	tmpl.Find("#content").SetHtml(previews.String())
+
+	final, err := tmpl.Html()
+	if err != nil {
+		return fmt.Errorf("Failed to serialize HTML: %w", err)
+	}
+
+	err = os.WriteFile(filepath.Join(targetDirectory(), "index.html"), []byte(final), 0644)
+	if err != nil {
+		return fmt.Errorf("Failed to write output: %w", err)
+	}
+
+	return nil
+}
+
 func main() {
 	if err := deleteDirIfExists(targetDirectory()); err != nil {
 		panic(err)
@@ -200,4 +286,9 @@ func main() {
 	if err := filepath.WalkDir(contentDirectory(), contentFileHandler); err != nil {
 		panic(err)
 	}
+
+	if err := generateHomePage(); err != nil {
+		panic(err)
+	}
 }
+

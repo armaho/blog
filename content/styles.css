@@ -16,7 +16,7 @@ body {
 }
 
 header {
-  margin-bottom: 40px;
+  margin-bottom: 60px;
 }
 
 #blog {
@@ -82,11 +82,25 @@ main a:is(:focus, :hover) {
   max-height: 20rem;
   overflow: hidden;
   mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
-  margin-bottom: 20px;
+  margin-bottom: 60px;
 }
 
 .article-info {
   color: var(--text-color-info);
+}
+
+.article-info p {
+  margin: 0;
+}
+
+.article-title-link {
+  text-decoration: underline;
+  text-decoration-color: var(--green);
+  text-decoration-thickness: 3px;
+}
+
+.article-title-link:is(:focus, :hover) {
+  text-decoration-color: var(--text-color-focus);
 }
 
 @media(max-width: 50em) {

@@ -69,5 +69,13 @@ main :is(h1, h2, h3, h4, h5, h6) {
   text-decoration-thickness: 3px;
 }
 
+main a {
+  color: var(--text-color);
+}
+
+main a:is(:focus, :hover) {
+  color: var(--text-color-focus);
+}
+
 @media(max-width: 50em) {
 }

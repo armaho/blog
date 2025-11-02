@@ -27,7 +27,7 @@ jobs:
           go build -o ../sitegen
 
       - name: "generate site"
-        run: CONTENT_PATH="./content" TARGET_PATH="./docs" TEMPLATE_PATH="template.html" ./sitegen    
+        run: CONTENT_PATH="content" TARGET_PATH="docs" TEMPLATE_PATH="template.html" ./sitegen    
 
       - name: "upload pages"
         uses: actions/upload-pages-artifact@v4

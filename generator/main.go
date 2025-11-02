@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/fs"
@@ -10,6 +11,12 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 )
+
+type articleInfo struct {
+	ReleaseDate   string `json:"release_date"`
+	WordCount     int    `json:"word_count"`
+	EstimatedTime int    `json:"estimated_time"`
+}
 
 func createDir(path string) error {
 	if err := os.MkdirAll(path, 0755); err != nil {
@@ -70,6 +77,34 @@ func handleDirectory(path string) error {
 	return createDir(targetPathFromContentPath(path))
 }
 
+func getArticleMetadata(path string) (articleInfo, error) {
+	var metadata articleInfo
+
+	metadataPath := filepath.Join(path, "metadata.json")
+	file, err := os.Open(metadataPath)
+	if err != nil {
+		return metadata, fmt.Errorf("Cannot read metadata file for article: %s",
+			metadataPath)
+	}
+	defer file.Close()
+
+	decoder := json.NewDecoder(file)
+	if err := decoder.Decode(&metadata); err != nil {
+		return metadata, fmt.Errorf("Cannot decode metadata: %s", err)
+	}
+
+	return metadata, nil
+}
+
+func addMetadataToArticle(metadata articleInfo, html string) string {
+	metadataText := fmt.Sprintf("%s • %d words • %d minutes",
+		metadata.ReleaseDate,
+		metadata.WordCount,
+		metadata.EstimatedTime)
+	metadataTag := "<div class=\"article-info\"><p>" + metadataText + "</p></div>"
+	return metadataTag + html
+}
+
 func handleHtmlFile(path string) error {
 	tmplFile, err := os.Open(templatePath())
 	if err != nil {
@@ -82,7 +117,6 @@ func handleHtmlFile(path string) error {
 		return fmt.Errorf("Failed to parse template: %w", err)
 	}
 
-	// Load source HTML
 	srcFile, err := os.Open(path)
 	if err != nil {
 		return fmt.Errorf("Failed to open source: %w", err)
@@ -100,6 +134,15 @@ func handleHtmlFile(path string) error {
 		if err != nil {
 			return fmt.Errorf("Failed to extract HTML: %w", err)
 		}
+	}
+
+	if strings.Contains(path, "articles") && filepath.Base(path) == "index.html" {
+		metadata, err := getArticleMetadata(filepath.Dir(path))
+		if err != nil {
+			return fmt.Errorf("Cannot add metadata: %s", err)
+		}
+
+		html = addMetadataToArticle(metadata, html)
 	}
 
 	tmplDoc.Find("#content").SetHtml(html)
